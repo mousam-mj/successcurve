@@ -1,0 +1,19 @@
+Radio
+
+[{"option_value":"Total internal reflection","has_file":0,"file_name":""},{"option_value":"High dense matter of star","has_file":0,"file_name":""},{"option_value":"Constant burning of hydrogen in the star","has_file":0,"file_name":""},{"option_value":"Fluctuating apparent position of star being slightly different from the actual position of star","has_file":0,"file_name":""}]
+
+
+
+checkbox
+
+[{"option_value":"a","optionl2_value":"","has_file":0,"file_name":""},{"option_value":"b","optionl2_value":"","has_file":0,"file_name":""},{"option_value":"c","optionl2_value":"","has_file":0,"file_name":""},{"option_value":"d","optionl2_value":"","has_file":0,"file_name":""}]
+
+
+
+Paragraph
+
+[{"question":"dfd","total_options":"4","options":[["cdf","dff","dff","dff"]]},
+
+{"question":"fsdf","total_options":"4","options":{"1":["fsfdf","dff","dfff","fdf"]}},
+
+{"question":"dcsc","total_options":"4","options":{"2":["dcfscf","dff","fdf","ff"]}}]

