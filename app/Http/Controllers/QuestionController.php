@@ -11,6 +11,7 @@ use App\Question;
 use App\Questionbank;
 use App\Imports\QuestionImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Exceptions\NoTypeDetectedException;
 
 
 use Illuminate\Support\Facades\Session;
@@ -1185,12 +1186,30 @@ class QuestionController extends Controller
     }
 
     public function downloadFormat(){
-        $file= public_path("/dwns/mcqFormatNew.xlsx");
-        return response()->download($file);
+        $file = public_path("/dwns/mcqFormatNew.xlsx");
+        $headers = [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ];
+        return response()->download($file, 'mcqFormatNew_mathjax.xlsx', $headers);
     }
 
     public function uploadMCQ(Request $req){
-        Excel::import(new QuestionImport, $req->file);
+        $req->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ], [
+            'file.required' => 'Please upload a file.',
+            'file.mimes' => 'Only .xlsx, .xls, or .csv files are allowed.',
+        ]);
+
+        try {
+            Excel::import(new QuestionImport, $req->file('file'));
+        } catch (NoTypeDetectedException $e) {
+            return back()->with('errors', 'File type could not be detected. Please upload a .xlsx, .xls, or .csv file.');
+        } catch (\Throwable $e) {
+            return back()->with('errors', 'Upload failed. Please verify the file format and try again.');
+        }
 
         if (Session::get('qaUserId')) {
             return redirect('qas/qns/'.$req->qlId)->with('success', 'Question Inserted Successfully!!');

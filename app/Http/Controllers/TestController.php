@@ -867,7 +867,21 @@ class TestController extends Controller
     }
  
     function importMCQs(Request $req){
-        Excel::import(new QuestionImport, $req->file);
+        $req->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+        ], [
+            'file.required' => 'Please upload a file.',
+            'file.mimes' => 'Only .xlsx, .xls, or .csv files are allowed.',
+        ]);
+
+        try {
+            Excel::import(new QuestionImport, $req->file('file'));
+        } catch (\Maatwebsite\Excel\Exceptions\NoTypeDetectedException $e) {
+            return back()->with('errors', 'File type could not be detected. Please upload a .xlsx, .xls, or .csv file.');
+        } catch (\Throwable $e) {
+            return back()->with('errors', 'Upload failed. Please verify the file format and try again.');
+        }
+
         return redirect('admin/questions')->with('success', 'Question Inserted Successfully!!');
     }
 

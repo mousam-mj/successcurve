@@ -34,12 +34,28 @@ Upload MCQ Question | {{ $qls->qlName }}
               </div>
                 
               <div class="card-body">
+                    @if(Session::get('errors'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                          <strong>{{ Session::get('errors') }}</strong>
+                          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                    @endif
+                    @if($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                          <strong>{{ $errors->first() }}</strong>
+                          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                    @endif
                     <form method="post" action="{{ url('qas/qns/mcq/up/add') }}" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="qlId" value="{{ $qls->qlId }}">
                         <div  class="form-group">
                             <label class="ds-label" for="file">Upload Excel File</label>
-                            <input type="file" name="file" class="form-control" id="file">
+                            <input type="file" name="file" class="form-control" id="file" accept=".xlsx,.xls,.csv">
                         </div>
                         <div class="form-group">
                             <button class="btn btn-primary btn-sm" type="submit">Upload</button>

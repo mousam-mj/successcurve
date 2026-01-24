@@ -16,6 +16,13 @@ class QuestionImport implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
+        $options = [
+            'option1' => $row['option1'] ?? '',
+            'option2' => $row['option2'] ?? '',
+            'option3' => $row['option3'] ?? '',
+            'option4' => $row['option4'] ?? '',
+        ];
+
         return new Questionbank([
             'qbId' => $row['f2'],
             'pqbId' => $row['f1'],
@@ -25,7 +32,7 @@ class QuestionImport implements ToModel, WithHeadingRow
             'qwType' => $row['type'],
             'qwTitle' => $row['question'],
             'totalOptions' => $row['totaloptions'],
-            'qwOptions' => '{"option1":"'. $row["option1"] .'","option2":"'. $row["option2"] .'","option3":"'. $row["option3"] .'","option4":"'. $row["option4"] .'"}',
+            'qwOptions' => json_encode($options, JSON_UNESCAPED_UNICODE),
             'qwCorrectAnswer' => $row['cans'],
             'qwlevel' => $row['level'],
             'qwHint' => $row['hint'],
