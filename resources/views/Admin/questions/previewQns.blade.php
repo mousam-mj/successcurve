@@ -101,3 +101,16 @@ Preview Question
 </div>
 
 @endsection
+
+@section('javascript')
+<script>
+// Re-render MathJAX after page load
+$(document).ready(function() {
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch(function (err) {
+            console.log('MathJax render error:', err);
+        });
+    }
+});
+</script>
+@endsection

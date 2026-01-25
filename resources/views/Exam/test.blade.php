@@ -356,5 +356,21 @@ $('#hstbtn').click(function(){
 <script src="{{asset('js/app01.js')}}"></script>
 <script>
  show_question(0);
+ 
+ // Re-render MathJAX after page load and question navigation
+ if (window.MathJax) {
+     MathJax.typesetPromise().catch(function (err) {
+         console.log('MathJax render error:', err);
+     });
+ }
+ 
+ // Re-render MathJAX when questions are shown
+ function renderMathJax() {
+     if (window.MathJax) {
+         MathJax.typesetPromise().catch(function (err) {
+             console.log('MathJax render error:', err);
+         });
+     }
+ }
 </script>
 @endsection

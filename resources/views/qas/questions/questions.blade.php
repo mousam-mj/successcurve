@@ -205,8 +205,23 @@ Questions
 <script>
 $(document).ready(function() {
     $('#dataTables-example1').DataTable({
-            responsive: true
+            responsive: true,
+            drawCallback: function() {
+                // Re-render MathJAX after table redraw
+                if (window.MathJax) {
+                    MathJax.typesetPromise().catch(function (err) {
+                        console.log('MathJax render error:', err);
+                    });
+                }
+            }
     });
+    
+    // Initial MathJAX render
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch(function (err) {
+            console.log('MathJax render error:', err);
+        });
+    }
 });
 
 </script>

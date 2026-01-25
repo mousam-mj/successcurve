@@ -66,6 +66,15 @@ function show_question(vqn){
 	qn=vqn;
     lqn=vqn;
 //setIndividual_time(lqn);
+    
+    // Re-render MathJAX when question is shown
+    if (window.MathJax) {
+        setTimeout(function() {
+            MathJax.typesetPromise().catch(function (err) {
+                console.log('MathJax render error:', err);
+            });
+        }, 100);
+    }
     	
 }
 function next_question(){
