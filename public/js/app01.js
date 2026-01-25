@@ -73,15 +73,23 @@ function show_question(vqn){
         setTimeout(function() {
             var questionElement = document.querySelector(did);
             if (questionElement) {
-                MathJax.typesetPromise([questionElement]).catch(function (err) {
+                // Reset MathJax for this element
+                MathJax.typesetClear([questionElement]);
+                MathJax.typesetPromise([questionElement]).then(function() {
+                    console.log('MathJax rendered for question ' + vqn);
+                }).catch(function (err) {
                     console.log('MathJax render error:', err);
+                    // Fallback to full page render
+                    MathJax.typesetPromise().catch(function (err2) {
+                        console.log('MathJax fallback render error:', err2);
+                    });
                 });
             } else {
                 MathJax.typesetPromise().catch(function (err) {
                     console.log('MathJax render error:', err);
                 });
             }
-        }, 100);
+        }, 200);
     }
     	
 }

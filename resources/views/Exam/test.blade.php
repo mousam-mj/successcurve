@@ -355,21 +355,41 @@ $('#hstbtn').click(function(){
 </script>
 <script src="{{asset('js/app01.js')}}"></script>
 <script>
- show_question(0);
- 
- // Re-render MathJAX after page load and question navigation
- if (window.MathJax) {
-     MathJax.typesetPromise().catch(function (err) {
-         console.log('MathJax render error:', err);
-     });
- }
+// Wait for MathJax to be ready before showing first question
+if (window.MathJax && window.MathJax.startup) {
+    MathJax.startup.promise.then(function() {
+        show_question(0);
+        // Initial render after MathJax is ready
+        setTimeout(function() {
+            if (MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(function (err) {
+                    console.log('MathJax initial render error:', err);
+                });
+            }
+        }, 500);
+    });
+} else {
+    // Fallback if MathJax loads after this script
+    $(document).ready(function() {
+        setTimeout(function() {
+            show_question(0);
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(function (err) {
+                    console.log('MathJax render error:', err);
+                });
+            }
+        }, 1000);
+    });
+}
  
  // Re-render MathJAX when questions are shown
  function renderMathJax() {
-     if (window.MathJax) {
-         MathJax.typesetPromise().catch(function (err) {
-             console.log('MathJax render error:', err);
-         });
+     if (window.MathJax && MathJax.typesetPromise) {
+         setTimeout(function() {
+             MathJax.typesetPromise().catch(function (err) {
+                 console.log('MathJax render error:', err);
+             });
+         }, 200);
      }
  }
 </script>
