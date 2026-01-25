@@ -49,18 +49,28 @@
                     color: [],
                     colorv2: ['color']
                 },
-                packages: {'[+]': ['ams', 'newcommand', 'configmacros']}
+                packages: {'[+]': ['ams', 'newcommand', 'configmacros']},
+                macros: {
+                    pm: '\\pm'
+                }
             },
             options: {
                 ignoreHtmlClass: 'tex2jax_ignore',
-                processHtmlClass: 'tex2jax_process',
+                processHtmlClass: 'tex2jax_process math-content',
                 skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            },
+            loader: {
+                load: ['[tex]/ams', '[tex]/newcommand', '[tex]/configmacros']
             },
             startup: {
                 ready: () => {
                     MathJax.startup.defaultReady();
                     MathJax.startup.promise.then(() => {
                         console.log('MathJax is ready');
+                        // Process all math content on page
+                        if (MathJax.typesetPromise) {
+                            MathJax.typesetPromise();
+                        }
                     });
                 }
             }

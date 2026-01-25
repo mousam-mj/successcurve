@@ -68,13 +68,28 @@ function show_question(vqn){
     lqn=vqn;
 //setIndividual_time(lqn);
     
-    // Re-render MathJAX when question is shown
-    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-        setTimeout(function() {
+    // Wrap LaTeX expressions in delimiters if needed
+    setTimeout(function() {
+        $(did + ' .math-content').each(function() {
+            var $this = $(this);
+            var content = $this.html();
+            
+            // Check if content contains LaTeX-like patterns but no delimiters
+            if (content && content.match(/\\[a-zA-Z]+|\\frac|\\sqrt|\\pm|\\times|\\div|\\leq|\\geq|\\neq|\\approx/) && 
+                !content.match(/\$|\\\(|\\\[/)) {
+                // Wrap content in inline math delimiters
+                $this.html('\\(' + content + '\\)');
+            }
+        });
+        
+        // Re-render MathJAX when question is shown
+        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
             var questionElement = document.querySelector(did);
             if (questionElement) {
                 // Reset MathJax for this element
-                MathJax.typesetClear([questionElement]);
+                if (MathJax.typesetClear) {
+                    MathJax.typesetClear([questionElement]);
+                }
                 MathJax.typesetPromise([questionElement]).then(function() {
                     console.log('MathJax rendered for question ' + vqn);
                 }).catch(function (err) {
@@ -89,8 +104,8 @@ function show_question(vqn){
                     console.log('MathJax render error:', err);
                 });
             }
-        }, 200);
-    }
+        }
+    }, 100);
     	
 }
 function next_question(){

@@ -101,10 +101,10 @@ Take Test
                     <div class="qbx" id="q<?php echo $count;?>">
                         <div class="qb">
                             @if ($que->paragraphId != 0)
-                            <div class="qpaara" style="font-size: 15px;">
-                                <span class="text-danger">Paragraph:</ nspan> {!! $que->paragraph !!}
+                            <div class="qpaara math-content" style="font-size: 15px;">
+                                <span class="text-danger">Paragraph:</span> {!! $que->paragraph !!}
                             </div>
-                            <div class="qpaara mt-20" style="font-size: 15px !important;">
+                            <div class="qpaara mt-20 math-content" style="font-size: 15px !important;">
                                 <span class="text-danger">Question:</span> {!! $que->qwTitle !!}
                             </div>
                             @else
@@ -131,12 +131,12 @@ Take Test
                                 @if ($que->qwType == "radio")
                                     <label class="radio" onclick="checkrad()">
                                         <input type="radio" name="answer[<?php echo $count;?>][]" value="<?php echo $i;?>" id="answer_value<?php echo $count.'-'.$i;?>">
-                                        <span class="option" style="font-size: 15px !important;"><span class="ono"><?php echo $i;?></span> {!! $options['option'.$i] !!}</span>
+                                        <span class="option" style="font-size: 15px !important;"><span class="ono"><?php echo $i;?></span> <span class="math-content">{!! $options['option'.$i] !!}</span></span>
                                     </label>
                                 @elseif ($que->qwType == "checkbox")
                                     <label class="radio" onclick="checkrad()">
                                         <input type="checkbox" name="answer[<?php echo $count;?>][]" value="<?php echo $i;?>" id="answer_value<?php echo $count.'-'.$i;?>">
-                                        <span class="option" style="font-size: 15px !important;"><span class="ono"><?php echo $i;?></span> {!! $options['option'.$i] !!}</span>
+                                        <span class="option" style="font-size: 15px !important;"><span class="ono"><?php echo $i;?></span> <span class="math-content">{!! $options['option'.$i] !!}</span></span>
                                     </label>
                                 @endif
                             <?php
@@ -163,8 +163,8 @@ Take Test
                             <div class="qb">
                                 @if ($que->paragraphId != 0)
                                 
-                                    <div class="qpaara" style="font-size: 15px;">
-                                        <span class="text-danger">Paragraph:</ nspan> {!! $que->prgContent !!}
+                                    <div class="qpaara math-content" style="font-size: 15px;">
+                                        <span class="text-danger">Paragraph:</span> {!! $que->prgContent !!}
                                     </div>
                                 @endif
 
@@ -177,7 +177,7 @@ Take Test
                         </div>
                         <div class="paraquesbox">
                             <div class="qb">
-                                <div class="qpaara mt-20" style="font-size: 15px !important;">
+                                <div class="qpaara mt-20 math-content" style="font-size: 15px !important;">
                                     <span class="text-danger">Question:</span> {!! $que->qwTitle !!}
                                 </div>
                             </div>
@@ -194,12 +194,12 @@ Take Test
                                 @if ($que->qwType == "radio")
                                     <label class="radio" onclick="checkrad()">
                                         <input type="radio" name="answer[<?php echo $count;?>][]" value="<?php echo $i;?>" id="answer_value<?php echo $count.'-'.$i;?>">
-                                        <span class="option" style="font-size: 15px !important;"><span class="ono"><?php echo $i;?></span> {!! $options['option'.$i] !!}</span>
+                                        <span class="option" style="font-size: 15px !important;"><span class="ono"><?php echo $i;?></span> <span class="math-content">{!! $options['option'.$i] !!}</span></span>
                                     </label>
                                 @elseif ($que->qwType == "checkbox")
                                     <label class="radio" onclick="checkrad()">
                                         <input type="checkbox" name="answer[<?php echo $count;?>][]" value="<?php echo $i;?>" id="answer_value<?php echo $count.'-'.$i;?>">
-                                        <span class="option" style="font-size: 15px !important;"><span class="ono"><?php echo $i;?></span> {!! $options['option'.$i] !!}</span>
+                                        <span class="option" style="font-size: 15px !important;"><span class="ono"><?php echo $i;?></span> <span class="math-content">{!! $options['option'.$i] !!}</span></span>
                                     </label>
                                 @endif
                             <?php
@@ -382,8 +382,26 @@ if (window.MathJax && window.MathJax.startup) {
     });
 }
  
+ // Function to wrap LaTeX expressions in delimiters if not already wrapped
+ function wrapLatexExpressions() {
+     $('.math-content').each(function() {
+         var $this = $(this);
+         var content = $this.html();
+         
+         // Check if content contains LaTeX-like patterns (backslashes, frac, etc.) but no delimiters
+         if (content.match(/\\[a-zA-Z]+|\\frac|\\sqrt|\\pm|\\times|\\div|\\leq|\\geq|\\neq|\\approx/) && 
+             !content.match(/\$|\\\(|\\\[/)) {
+             // Wrap content in inline math delimiters
+             $this.html('\\(' + content + '\\)');
+         }
+     });
+ }
+ 
  // Re-render MathJAX when questions are shown
  function renderMathJax() {
+     // First wrap any unwrapped LaTeX expressions
+     wrapLatexExpressions();
+     
      if (window.MathJax && MathJax.typesetPromise) {
          setTimeout(function() {
              MathJax.typesetPromise().catch(function (err) {
