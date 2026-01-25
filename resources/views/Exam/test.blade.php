@@ -35,7 +35,7 @@ Take Test
         <div class="main-q">
             <div class="final-dialoge" id="final-dialouge">
                 <div class="final-dbox">
-                    <button class="closebtn" onclick="closeDialouge();"><img src="{{ asset('imgs/cancel.svg') }}"></button>
+                    <button class="closebtn" onclick="closeDialouge();"><i class="fas fa-times"></i></button>
                     <h6>Are You Sure Want to Submit The Test?</h6>
                     <div class="notin">
                         <div class="notinl">
@@ -61,7 +61,7 @@ Take Test
             </div>
             <div class="final-dialoge" id="final-dialouge2">
                 <div class="final-dbox">
-                    <button class="closebtn" onclick="closeDialouge2();"><img src="{{ asset('imgs/cancel.svg') }}"></button>
+                    <button class="closebtn" onclick="closeDialouge2();"><i class="fas fa-times"></i></button>
                     <textarea class="form-control" rows="6" id="reportText" placeholder="Write The Issue"></textarea>
                     
                     <div class="notinr text-center">
