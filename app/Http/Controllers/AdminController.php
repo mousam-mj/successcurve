@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\File;
 use App\Exports\ClassUserExport;
+use App\Exports\UsersExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AdminController extends Controller
@@ -331,10 +332,72 @@ class AdminController extends Controller
         return view('Admin.users.admins', ['title'=>"Instructors",'users'=>$user]);
     }
 
-    public function users(){
-        $user = User::where('type', 'user')->get();
+    public function users(Request $req = null){
+        $query = User::where('type', 'user');
+        
+        // Apply filters if provided
+        if ($req && $req->has('filter')) {
+            if ($req->status != '') {
+                if ($req->status == 'active') {
+                    $query->where('userStatus', '!=', 2);
+                } elseif ($req->status == 'banned') {
+                    $query->where('userStatus', 2);
+                }
+            }
+            
+            if ($req->search != '') {
+                $search = $req->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', '%'.$search.'%')
+                      ->orWhere('email', 'like', '%'.$search.'%')
+                      ->orWhere('contact', 'like', '%'.$search.'%');
+                });
+            }
+        }
+        
+        $user = $query->get();
 
         return view('Admin.users.admins', ['title'=>"Users",'users'=>$user]);
+    }
+    
+    public function filterUsers(Request $req){
+        $query = User::where('type', 'user');
+        
+        if ($req->status != '') {
+            if ($req->status == 'active') {
+                $query->where('userStatus', '!=', 2);
+            } elseif ($req->status == 'banned') {
+                $query->where('userStatus', 2);
+            }
+        }
+        
+        if ($req->search != '') {
+            $search = $req->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%'.$search.'%')
+                  ->orWhere('email', 'like', '%'.$search.'%')
+                  ->orWhere('contact', 'like', '%'.$search.'%');
+            });
+        }
+        
+        $user = $query->get();
+
+        return view('Admin.users.admins', [
+            'title'=>"Users",
+            'users'=>$user,
+            'filterStatus' => $req->status ?? '',
+            'filterSearch' => $req->search ?? ''
+        ]);
+    }
+    
+    public function exportUsers(Request $req){
+        $filters = [
+            'type' => 'user',
+            'status' => $req->status ?? '',
+            'search' => $req->search ?? '',
+        ];
+        
+        return Excel::download(new UsersExport($filters), 'users_export.xlsx');
     }
 
     public function qas(){

@@ -1,5 +1,10 @@
-
-
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test Questions - {{ $tsts->tName ?? 'Test' }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
     .main-box{
         width: 100%;
@@ -45,8 +50,27 @@ label.radio .option {
 }
 
 </style>
-
-
+</head>
+<body>
+<div class="container-fluid p-4">
+    @if(isset($tsts))
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title" style="float: left;">Test Questions: {{ $tsts->tName }}</h3>
+            <div class="card-tools" style="float: right;">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="{{ url('admin/tests/'.$tsts->tId.'/export/pdf?withAnswers=1') }}">With Answers</a>
+                        <a class="dropdown-item" href="{{ url('admin/tests/'.$tsts->tId.'/export/pdf?withAnswers=0') }}">Without Answers</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 <div class="main-box">
     <?php $count = 1?>
     @foreach ($questionModels as $qnsModel)
@@ -150,4 +174,9 @@ label.radio .option {
     @endforeach
 
 </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>
 

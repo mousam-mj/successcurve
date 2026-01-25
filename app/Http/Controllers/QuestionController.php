@@ -12,7 +12,7 @@ use App\Questionbank;
 use App\Imports\QuestionImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Exceptions\NoTypeDetectedException;
-
+use PDF;
 
 use Illuminate\Support\Facades\Session;
 
@@ -627,7 +627,7 @@ class QuestionController extends Controller
     // Question methods 
 
 
-    public function qns($id){
+    public function qns($id, Request $req = null){
         // $qns = Question::where('qlId', $id)->get();
         $qns = Questionbank::where('qlId', $id);
 
@@ -635,9 +635,29 @@ class QuestionController extends Controller
             $qns = $qns->where('qwCreatedBy', Session::get('qaUserId'));
         }
         
-        $qns = $qns->where('qwStatus', 1)->get();
-
-        // dd($qns);
+        $qns = $qns->where('qwStatus', 1);
+        
+        // Apply filters if provided
+        if ($req && $req->has('filter')) {
+            if ($req->type != '') {
+                if ($req->type == 'mcq') {
+                    $qns = $qns->where('qwType', 'radio')->where('paragraphId', 0);
+                } elseif ($req->type == 'msq') {
+                    $qns = $qns->where('qwType', 'checkbox')->where('paragraphId', 0);
+                } elseif ($req->type == 'nat') {
+                    $qns = $qns->where('qwType', 'nat')->where('paragraphId', 0);
+                } elseif ($req->type == 'pr') {
+                    $qns = $qns->where('paragraphId', '!=', 0);
+                }
+            }
+            
+            if ($req->search != '') {
+                $search = $req->search;
+                $qns = $qns->where('qwTitle', 'like', '%'.$search.'%');
+            }
+        }
+        
+        $qns = $qns->get();
 
         $qls = Qlession::where('qlId', $id)->first();
 
@@ -646,6 +666,82 @@ class QuestionController extends Controller
         }
 
         return view('Admin/questions/questions', ['qns'=>$qns, 'qls'=>$qls]);
+    }
+    
+    public function filterQuestions($id, Request $req){
+        $qns = Questionbank::where('qlId', $id);
+
+        if (Session::get('qaUserId')) {
+            $qns = $qns->where('qwCreatedBy', Session::get('qaUserId'));
+        }
+        
+        $qns = $qns->where('qwStatus', 1);
+        
+        if ($req->type != '') {
+            if ($req->type == 'mcq') {
+                $qns = $qns->where('qwType', 'radio')->where('paragraphId', 0);
+            } elseif ($req->type == 'msq') {
+                $qns = $qns->where('qwType', 'checkbox')->where('paragraphId', 0);
+            } elseif ($req->type == 'nat') {
+                $qns = $qns->where('qwType', 'nat')->where('paragraphId', 0);
+            } elseif ($req->type == 'pr') {
+                $qns = $qns->where('paragraphId', '!=', 0);
+            }
+        }
+        
+        if ($req->search != '') {
+            $search = $req->search;
+            $qns = $qns->where('qwTitle', 'like', '%'.$search.'%');
+        }
+        
+        $qns = $qns->get();
+
+        $qls = Qlession::where('qlId', $id)->first();
+
+        if (Session::get('qaUserId')) {
+            return view('qas/questions/questions', ['qns'=>$qns, 'qls'=>$qls, 'filterType' => $req->type ?? '', 'filterSearch' => $req->search ?? '']);
+        }
+
+        return view('Admin/questions/questions', ['qns'=>$qns, 'qls'=>$qls, 'filterType' => $req->type ?? '', 'filterSearch' => $req->search ?? '']);
+    }
+    
+    public function exportQuestionsPDF($id, Request $req){
+        $qns = Questionbank::where('qlId', $id)->where('qwStatus', 1);
+        
+        if (Session::get('qaUserId')) {
+            $qns = $qns->where('qwCreatedBy', Session::get('qaUserId'));
+        }
+        
+        // Apply filters if provided
+        if ($req->type != '') {
+            if ($req->type == 'mcq') {
+                $qns = $qns->where('qwType', 'radio')->where('paragraphId', 0);
+            } elseif ($req->type == 'msq') {
+                $qns = $qns->where('qwType', 'checkbox')->where('paragraphId', 0);
+            } elseif ($req->type == 'nat') {
+                $qns = $qns->where('qwType', 'nat')->where('paragraphId', 0);
+            } elseif ($req->type == 'pr') {
+                $qns = $qns->where('paragraphId', '!=', 0);
+            }
+        }
+        
+        if ($req->search != '') {
+            $search = $req->search;
+            $qns = $qns->where('qwTitle', 'like', '%'.$search.'%');
+        }
+        
+        $questions = $qns->get();
+        $qls = Qlession::where('qlId', $id)->first();
+        $showAnswers = $req->has('withAnswers') && $req->withAnswers == '1';
+        
+        $pdf = PDF::loadView('Admin/questions/questionsPDF', [
+            'questions' => $questions,
+            'qls' => $qls,
+            'showAnswers' => $showAnswers
+        ]);
+        
+        $filename = 'questions_' . ($showAnswers ? 'with_answers' : 'without_answers') . '.pdf';
+        return $pdf->download($filename);
     }
     
     public function trashQns($id){

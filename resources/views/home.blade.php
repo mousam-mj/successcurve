@@ -77,7 +77,7 @@ Home
         <div class="search-cont mt-30">
             <div class="cont-item">
                 <div class="item-icon">
-                    <i class="far fa-video si"></i>
+                    <i class="fas fa-book si"></i>
                 </div>
                 <div class="item-ct">
                     <h3 class="sct-h3">10+</h3>
@@ -86,7 +86,7 @@ Home
             </div>
             <div class="cont-item">
                 <div class="item-icon">
-                    <i class="fal fa-ballot-check si"></i>
+                    <i class="fas fa-clipboard-list si"></i>
                 </div>
                 <div class="item-ct">
                     <h3 class="sct-h3">100+</h3>
@@ -95,7 +95,7 @@ Home
             </div>
             <div class="cont-item">
                 <div class="item-icon">
-                    <i class="fas fa-user si"></i>
+                    <i class="fas fa-users si"></i>
                 </div>
                 <div class="item-ct">
                     <h3 class="sct-h3">1000+</h3>

@@ -1029,13 +1029,33 @@ class TestController extends Controller
         }
     }
 
-    function sectionQuestion($id){
+    function sectionQuestion($id, Request $req = null){
         $tsec = Testsection::where('tsecId', $id)->first();
         $ques = Testquestion::join('questionbanks', 'testquestions.questionId', '=', 'questionbanks.qwId')
             ->select('questionbanks.*')
-            ->where('tsecId', $id)
-            ->orderBy('tqId', 'asc')
-            ->get();
+            ->where('tsecId', $id);
+        
+        // Apply filters if provided
+        if ($req && $req->has('filter')) {
+            if ($req->type != '') {
+                if ($req->type == 'mcq') {
+                    $ques = $ques->where('questionbanks.qwType', 'radio')->where('questionbanks.paragraphId', 0);
+                } elseif ($req->type == 'msq') {
+                    $ques = $ques->where('questionbanks.qwType', 'checkbox')->where('questionbanks.paragraphId', 0);
+                } elseif ($req->type == 'nat') {
+                    $ques = $ques->where('questionbanks.qwType', 'nat')->where('questionbanks.paragraphId', 0);
+                } elseif ($req->type == 'pr') {
+                    $ques = $ques->where('questionbanks.paragraphId', '!=', 0);
+                }
+            }
+            
+            if ($req->search != '') {
+                $search = $req->search;
+                $ques = $ques->where('questionbanks.qwTitle', 'like', '%'.$search.'%');
+            }
+        }
+        
+        $ques = $ques->orderBy('tqId', 'asc')->get();
 
         if (Session::get('auserId')) {
             return view('Admin/sectionQuestion', ['tsecs'=>$tsec, 'ques'=>$ques, 'success'=>'Test Section Questions']);
@@ -1043,6 +1063,165 @@ class TestController extends Controller
             return view('Faculty/tests/sectionQuestion', ['tsecs'=>$tsec, 'ques'=>$ques, 'success'=>'Test Section Questions']);
         }
         
+    }
+    
+    public function filterSectionQuestions($id, Request $req){
+        $tsec = Testsection::where('tsecId', $id)->first();
+        $ques = Testquestion::join('questionbanks', 'testquestions.questionId', '=', 'questionbanks.qwId')
+            ->select('questionbanks.*')
+            ->where('tsecId', $id);
+        
+        if ($req->type != '') {
+            if ($req->type == 'mcq') {
+                $ques = $ques->where('questionbanks.qwType', 'radio')->where('questionbanks.paragraphId', 0);
+            } elseif ($req->type == 'msq') {
+                $ques = $ques->where('questionbanks.qwType', 'checkbox')->where('questionbanks.paragraphId', 0);
+            } elseif ($req->type == 'nat') {
+                $ques = $ques->where('questionbanks.qwType', 'nat')->where('questionbanks.paragraphId', 0);
+            } elseif ($req->type == 'pr') {
+                $ques = $ques->where('questionbanks.paragraphId', '!=', 0);
+            }
+        }
+        
+        if ($req->search != '') {
+            $search = $req->search;
+            $ques = $ques->where('questionbanks.qwTitle', 'like', '%'.$search.'%');
+        }
+        
+        $ques = $ques->orderBy('tqId', 'asc')->get();
+
+        if (Session::get('auserId')) {
+            return view('Admin/sectionQuestion', [
+                'tsecs'=>$tsec, 
+                'ques'=>$ques, 
+                'success'=>'Test Section Questions',
+                'filterType' => $req->type ?? '',
+                'filterSearch' => $req->search ?? ''
+            ]);
+        } elseif(Session::get('fuserId')) {
+            return view('Faculty/tests/sectionQuestion', [
+                'tsecs'=>$tsec, 
+                'ques'=>$ques, 
+                'success'=>'Test Section Questions',
+                'filterType' => $req->type ?? '',
+                'filterSearch' => $req->search ?? ''
+            ]);
+        }
+    }
+    
+    public function exportSectionQuestionsPDF($id, Request $req){
+        $tsec = Testsection::where('tsecId', $id)->first();
+        
+        if (!$tsec) {
+            return back()->with('error', 'Test section not found!');
+        }
+        
+        $ques = Testquestion::join('questionbanks', 'testquestions.questionId', '=', 'questionbanks.qwId')
+            ->select('questionbanks.*')
+            ->where('tsecId', $id);
+        
+        // Apply filters if provided
+        if ($req->has('type') && $req->type != '') {
+            if ($req->type == 'mcq') {
+                $ques = $ques->where('questionbanks.qwType', 'radio')->where('questionbanks.paragraphId', 0);
+            } elseif ($req->type == 'msq') {
+                $ques = $ques->where('questionbanks.qwType', 'checkbox')->where('questionbanks.paragraphId', 0);
+            } elseif ($req->type == 'nat') {
+                $ques = $ques->where('questionbanks.qwType', 'nat')->where('questionbanks.paragraphId', 0);
+            } elseif ($req->type == 'pr') {
+                $ques = $ques->where('questionbanks.paragraphId', '!=', 0);
+            }
+        }
+        
+        if ($req->has('search') && $req->search != '') {
+            $search = $req->search;
+            $ques = $ques->where('questionbanks.qwTitle', 'like', '%'.$search.'%');
+        }
+        
+        $questions = $ques->orderBy('tqId', 'asc')->get();
+        $showAnswers = $req->has('withAnswers') && $req->withAnswers == '1';
+        
+        if ($questions->isEmpty()) {
+            return back()->with('error', 'No questions found to export!');
+        }
+        
+        try {
+            $pdf = PDF::loadView('Admin/tests/sectionQuestionsPDF', [
+                'questions' => $questions,
+                'tsec' => $tsec,
+                'showAnswers' => $showAnswers
+            ]);
+            
+            $filename = 'section_questions_' . ($showAnswers ? 'with_answers' : 'without_answers') . '.pdf';
+            return $pdf->download($filename);
+        } catch (\Exception $e) {
+            \Log::error('PDF Export Error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return back()->with('error', 'Error generating PDF. Please check logs for details.');
+        }
+    }
+    
+    public function exportTestQuestionsPDF($id, Request $req){
+        $data = Test::where('tId', $id)->first();
+        $tsecs = Testsection::where('testId', $id)->get();
+        $showAnswers = $req->has('withAnswers') && $req->withAnswers == '1';
+
+        $count = 0;
+        $testSections = [];
+
+        foreach ($tsecs as $tsec) {
+            $que = Testquestion::join('questionbanks', 'testquestions.questionId', '=', 'questionbanks.qwId')
+            ->select('testquestions.*', 'questionbanks.*')
+            ->where('testid', $id)
+            ->where('tsecId', $tsec->tsecId)
+            ->where('questionbanks.paragraphId', '0')
+            ->orderBy('tsecId', 'ASC')
+            ->get();
+
+            $pques = TestQuestion::join('questionbanks', 'testquestions.questionId', '=', 'questionbanks.qwId')
+            ->select('questionbanks.qwId')
+            ->where('testid', $id)
+            ->where('tsecId', $tsec->tsecId)
+            ->where('questionbanks.paragraphId', '!=', '0')
+            ->orderBy('tsecId', 'ASC')
+            ->get();
+
+            $pqids = [];
+            $c = 0;
+            foreach($pques as $pq){
+                $pqids[$c] = $pq->qwId;
+                $c++;
+            }
+
+            $pques = Questionbank::join('paragraphs', 'paragraphs.prgId', '=', 'questionbanks.paragraphId')
+            ->select('paragraphs.prgContent as prgContent', 'questionbanks.*')
+            ->whereIn('qwId', $pqids)
+            ->orderBy('paragraphs.prgId', 'ASC')
+            ->get();
+
+            if (!empty($que) && count($que) > 0) {
+                $testSections[$count]['tsec'] = $tsec;
+                $testSections[$count]['questions'] = $que;
+            }
+
+            if (!empty($pques) && count($pques) > 0) {
+                $testSections[$count]['paragraphs'] = $pques;
+            } else {
+                $testSections[$count]['paragraphs'] = null;
+            }
+            
+            $count++;
+        }
+
+        $pdf = PDF::loadView('Admin/tests/testQuestionsPDF', [
+            'tsts'=>$data,
+            'tsecs'=>$tsecs,
+            'questionModels'=>$testSections,
+            'showAnswers' => $showAnswers
+        ]);
+        
+        $filename = 'test_questions_' . ($showAnswers ? 'with_answers' : 'without_answers') . '.pdf';
+        return $pdf->download($filename);
     }
 
     function addQuestionToSection($id){
@@ -1179,16 +1358,50 @@ class TestController extends Controller
         }
     }
 
-    function questionReports(){
-        $reports = Questionreport::join('questionbanks', 'questionreports.questionId', '=', 'questionbanks.qwId')
-            ->select('questionreports.*', 'questionbanks.qwTitle as qwTitle', 'questionbanks.qwId as qwId', )
-            ->orderBy('rpId', 'DESC')
-            ->get();
+    function questionReports(Request $req){
+        $query = Questionreport::join('questionbanks', 'questionreports.questionId', '=', 'questionbanks.qwId')
+            ->select('questionreports.*', 'questionbanks.qwTitle as qwTitle', 'questionbanks.qwId as qwId');
+        
+        $hasClassFilter = $req->has('class') && $req->class != '' && $req->class != '0';
+        $hasSubjectFilter = $req->has('subject') && $req->subject != '' && $req->subject != '0';
+        
+        // Join with tests if either filter is applied
+        if ($hasClassFilter || $hasSubjectFilter) {
+            $query->join('testquestions', 'questionbanks.qwId', '=', 'testquestions.questionId')
+                  ->join('tests', 'testquestions.testid', '=', 'tests.tId')
+                  ->distinct();
+            
+            if ($hasClassFilter) {
+                $query->where('tests.tClass', $req->class);
+            }
+            
+            if ($hasSubjectFilter) {
+                $query->where('tests.tSubject', $req->subject);
+            }
+        }
+        
+        $reports = $query->orderBy('questionreports.rpId', 'DESC')
+            ->paginate(10);
+        
+        $classes = Classe::orderBy('className', 'ASC')->get();
+        $subjects = Subject::get();
 
         if (Session::get('auserId')) {
-            return view('Admin/questionReports', ['reports'=>$reports]);
+            return view('Admin/questionReports', [
+                'reports'=>$reports,
+                'classes'=>$classes,
+                'subjects'=>$subjects,
+                'filterClass' => $req->class ?? '',
+                'filterSubject' => $req->subject ?? ''
+            ]);
         } elseif(Session::get('fuserId')) {
-            return view('Faculty/tests/questionReports', ['reports'=>$reports]);
+            return view('Faculty/tests/questionReports', [
+                'reports'=>$reports,
+                'classes'=>$classes,
+                'subjects'=>$subjects,
+                'filterClass' => $req->class ?? '',
+                'filterSubject' => $req->subject ?? ''
+            ]);
         }
         
     }

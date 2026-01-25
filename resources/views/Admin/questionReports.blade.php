@@ -47,6 +47,34 @@ Question Reports
                     
                 </div>
               </div>
+              
+              <div class="card-header">
+                <form action="{{ url('admin/questionReports') }}" method="GET" class="form-inline">
+                    <label class="sr-only" for="class">Class</label>
+                    <select class="form-control mb-2 mr-sm-2" id="class" name="class">
+                        <option value="0">All Classes</option>
+                        @foreach($classes as $cls)
+                            <option value="{{ $cls->classId }}" {{ (isset($filterClass) && $filterClass == $cls->classId) ? 'selected' : '' }}>
+                                {{ $cls->className }}
+                            </option>
+                        @endforeach
+                    </select>
+                    
+                    <label class="sr-only" for="subject">Subject</label>
+                    <select class="form-control mb-2 mr-sm-2" id="subject" name="subject">
+                        <option value="0">All Subjects</option>
+                        @foreach($subjects as $sub)
+                            <option value="{{ $sub->subjectId }}" {{ (isset($filterSubject) && $filterSubject == $sub->subjectId) ? 'selected' : '' }}>
+                                {{ $sub->subjectName }}
+                            </option>
+                        @endforeach
+                    </select>
+                  
+                    <button type="submit" class="btn btn-primary mb-2">Filter</button>
+                    <a href="{{ url('admin/questionReports') }}" class="btn btn-secondary mb-2 ml-2">Reset</a>
+                </form>
+              </div>
+              
               <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover" id="dataTables-example1">
@@ -82,6 +110,16 @@ Question Reports
                     </table>
                 </div>
                 <!-- /.table-responsive -->
+                
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        Showing {{ $reports->firstItem() ?? 0 }} to {{ $reports->lastItem() ?? 0 }} of {{ $reports->total() }} entries
+                    </div>
+                    <div>
+                        {{ $reports->appends(request()->query())->links() }}
+                    </div>
+                </div>
 
               </div>
               <!-- /.card-body -->
@@ -105,6 +143,16 @@ Question Reports
 
 @section('javascript')
 <script>
-  
+$(document).ready(function() {
+    $('#dataTables-example1').DataTable({
+            responsive: true,
+            paging: false, // Disable DataTables pagination since we're using Laravel pagination
+            searching: false, // Disable DataTables search since we have filters
+            info: false
+    });
+    
+    // Load classes and subjects via AJAX if needed
+    // Classes and subjects are already loaded in the view
+});
 </script>
 @endsection

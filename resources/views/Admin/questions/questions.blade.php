@@ -46,6 +46,15 @@ Questions
                 <h3 class="card-title" style="float: left;">Questions : {{ $qls->qlName }}</h3>
 
                 <div class="card-tools" style="float: right;">
+                    <div class="btn-group" style="margin-right: 10px;">
+                        <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#" id="exportPdfWithAnswers">With Answers</a>
+                            <a class="dropdown-item" href="#" id="exportPdfWithoutAnswers">Without Answers</a>
+                        </div>
+                    </div>
                     <!-- Example split danger button -->
                     <!-- Example single danger button -->
                     <div class="btn-group">
@@ -105,6 +114,26 @@ Questions
                         </div>
                     </div>
                 </div>
+              </div>
+              
+              <div class="card-header">
+                <form action="{{ url('admin/qns/'.$qls->qlId.'/filter') }}" method="POST" class="form-inline" id="filterForm">
+                    @csrf
+                    <label class="sr-only" for="type">Type</label>
+                    <select class="form-control mb-2 mr-sm-2" id="type" name="type">
+                        <option value="">All Types</option>
+                        <option value="mcq" {{ (isset($filterType) && $filterType == 'mcq') ? 'selected' : '' }}>MCQ</option>
+                        <option value="msq" {{ (isset($filterType) && $filterType == 'msq') ? 'selected' : '' }}>MSQ</option>
+                        <option value="nat" {{ (isset($filterType) && $filterType == 'nat') ? 'selected' : '' }}>NAT</option>
+                        <option value="pr" {{ (isset($filterType) && $filterType == 'pr') ? 'selected' : '' }}>PRQ</option>
+                    </select>
+                    
+                    <label class="sr-only" for="search">Search</label>
+                    <input type="text" class="form-control mb-2 mr-sm-2" id="search" name="search" placeholder="Search questions..." value="{{ $filterSearch ?? '' }}">
+                  
+                    <button type="submit" class="btn btn-primary mb-2">Filter</button>
+                    <a href="{{ url('admin/qns/'.$qls->qlId) }}" class="btn btn-secondary mb-2 ml-2">Reset</a>
+                </form>
               </div>
 
               <div class="card-body">
@@ -220,6 +249,27 @@ $(document).ready(function() {
             console.log('MathJax render error:', err);
         });
     }
+    
+    // PDF Export handlers
+    $('#exportPdfWithAnswers').click(function(e) {
+        e.preventDefault();
+        var type = $('#type').val();
+        var search = $('#search').val();
+        var url = "{{ url('admin/qns/'.$qls->qlId.'/export/pdf') }}?withAnswers=1";
+        if (type) url += '&type=' + encodeURIComponent(type);
+        if (search) url += '&search=' + encodeURIComponent(search);
+        window.location.href = url;
+    });
+    
+    $('#exportPdfWithoutAnswers').click(function(e) {
+        e.preventDefault();
+        var type = $('#type').val();
+        var search = $('#search').val();
+        var url = "{{ url('admin/qns/'.$qls->qlId.'/export/pdf') }}?withAnswers=0";
+        if (type) url += '&type=' + encodeURIComponent(type);
+        if (search) url += '&search=' + encodeURIComponent(search);
+        window.location.href = url;
+    });
 });
 
 </script>

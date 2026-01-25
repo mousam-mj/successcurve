@@ -340,6 +340,8 @@ Route::middleware(['adminAuth'])->group(function () {
 
     // Questions
     Route::get('admin/qns/{id}', 'QuestionController@qns');
+    Route::post('admin/qns/{id}/filter', 'QuestionController@filterQuestions');
+    Route::get('admin/qns/{id}/export/pdf', 'QuestionController@exportQuestionsPDF');
 
     // New Question Form
     Route::get('admin/qns/new/{id}', 'QuestionController@newQns');
@@ -420,6 +422,9 @@ Route::middleware(['adminAuth'])->group(function () {
 
     // Test Section Question Routes
     Route::Get('admin/sectionQuestion/{id}', 'TestController@sectionQuestion');
+    Route::post('admin/sectionQuestion/{id}/filter', 'TestController@filterSectionQuestions');
+    Route::get('admin/sectionQuestion/{id}/export/pdf', 'TestController@exportSectionQuestionsPDF');
+    Route::get('admin/tests/{id}/export/pdf', 'TestController@exportTestQuestionsPDF');
     Route::Get('admin/addQuestionToSection/{id}', 'TestController@addQuestionToSection');
 
     Route::Post('admin/getTopicQuestions', 'TestController@getTopicQuestions');
@@ -498,6 +503,8 @@ Route::middleware(['adminAuth'])->group(function () {
     Route::get('admin/users/admins', 'AdminController@admins');
     Route::get('admin/users/instructors', 'AdminController@instructors');
     Route::get('admin/users/users', 'AdminController@users');
+    Route::post('admin/users/filter', 'AdminController@filterUsers');
+    Route::get('admin/users/export', 'AdminController@exportUsers');
     Route::get('admin/users/qas', 'AdminController@qas');
     Route::get('admin/user/ban/{id}', 'AdminController@banUser');
     Route::get('admin/user/unban/{id}', 'AdminController@unbanUser');

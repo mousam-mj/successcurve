@@ -81,12 +81,12 @@
 
                                     </td>
                                     <td class="text-center">
-                                        @if($s->status == 0)
-                                            <a href="{{ url('admin/sliders/activate/'.$s->id) }}" class="text-success">
+                                        @if($s->status == 0 || $s->status == null)
+                                            <a href="{{ url('admin/sliders/activate/'.$s->id) }}" class="text-success" title="Activate">
                                                 <i class="fas fa-ban"></i>
                                             </a>
                                         @elseif($s->status == 1)
-                                            <a href="{{ url('admin/sliders/deactivate/'.$s->id) }}" class="text-danger">
+                                            <a href="{{ url('admin/sliders/deactivate/'.$s->id) }}" class="text-danger" title="Deactivate">
                                                 <i class="fas fa-ban"></i>
                                             </a>
                                         @endif

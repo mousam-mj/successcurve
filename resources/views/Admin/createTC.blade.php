@@ -96,12 +96,12 @@ Create Test Catogery
                                     <td>{{ $tc->tcStatus }}</td>
                                     <td>{{ $tc->created_at }}</td>
                                     <td class="text-center">
-                                        @if($tc->tcStatus == 0)
-                                            <a href="{{ url('admin/ts/activate/'.$tc->tcId) }}" class="text-success">
+                                        @if($tc->tcStatus == 0 || $tc->tcStatus == null)
+                                            <a href="{{ url('admin/ts/activate/'.$tc->tcId) }}" class="text-success" title="Activate">
                                                 <i class="far fa-ban"></i>
                                             </a>
                                         @elseif($tc->tcStatus == 1)
-                                            <a href="{{ url('admin/ts/deactivate/'.$tc->tcId) }}" class="text-danger">
+                                            <a href="{{ url('admin/ts/deactivate/'.$tc->tcId) }}" class="text-danger" title="Deactivate">
                                                 <i class="far fa-ban"></i>
                                             </a>
                                         @endif
