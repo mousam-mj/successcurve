@@ -42,6 +42,7 @@ function show_question(vqn){
     }else{
         $(did).css('display','block');
     }
+    
 	// hide show next back btn
 	if(vqn >= 1){
 	$('#prevBtn').css('visibility','visible');
@@ -68,11 +69,18 @@ function show_question(vqn){
 //setIndividual_time(lqn);
     
     // Re-render MathJAX when question is shown
-    if (window.MathJax) {
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
         setTimeout(function() {
-            MathJax.typesetPromise().catch(function (err) {
-                console.log('MathJax render error:', err);
-            });
+            var questionElement = document.querySelector(did);
+            if (questionElement) {
+                MathJax.typesetPromise([questionElement]).catch(function (err) {
+                    console.log('MathJax render error:', err);
+                });
+            } else {
+                MathJax.typesetPromise().catch(function (err) {
+                    console.log('MathJax render error:', err);
+                });
+            }
         }, 100);
     }
     	
