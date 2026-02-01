@@ -1263,12 +1263,44 @@ class QuestionController extends Controller
         if ($qns->paragraphId != 0){
             $para = Paragraph::where('prgId', $qns->paragraphId)->first();
         }
+        
+        // Get previous and next question IDs
+        $prevQuestion = Questionbank::where('qwId', '<', $id)->orderBy('qwId', 'desc')->first();
+        $nextQuestion = Questionbank::where('qwId', '>', $id)->orderBy('qwId', 'asc')->first();
+        
+        $prevId = $prevQuestion ? $prevQuestion->qwId : null;
+        $nextId = $nextQuestion ? $nextQuestion->qwId : null;
+        
+        // Determine edit route based on question type
+        $editRoute = '';
+        if ($qns->qwType == 'radio') {
+            $editRoute = Session::get('qaUserId') ? 'qas/qns/mcq/edit/' : 'admin/qns/mcq/edit/';
+        } elseif ($qns->qwType == 'checkbox') {
+            $editRoute = Session::get('qaUserId') ? 'qas/qns/msq/edit/' : 'admin/qns/msq/edit/';
+        } elseif ($qns->qwType == 'nat') {
+            $editRoute = Session::get('qaUserId') ? 'qas/qns/nat/edit/' : 'admin/qns/nat/edit/';
+        } else {
+            $editRoute = Session::get('qaUserId') ? 'qas/qns/pr/edit/' : 'admin/qns/pr/edit/';
+        }
+        
         // dd($para);
         if (Session::get('qaUserId')) {
-            return view("qas/questions/previewQns", ['qns'=>$qns, 'paragraphs'=>$para]);
+            return view("qas/questions/previewQns", [
+                'qns'=>$qns, 
+                'paragraphs'=>$para,
+                'prevId' => $prevId,
+                'nextId' => $nextId,
+                'editRoute' => $editRoute
+            ]);
         }
 
-        return view("Admin/questions/previewQns", ['qns'=>$qns, 'paragraphs'=>$para]);
+        return view("Admin/questions/previewQns", [
+            'qns'=>$qns, 
+            'paragraphs'=>$para,
+            'prevId' => $prevId,
+            'nextId' => $nextId,
+            'editRoute' => $editRoute
+        ]);
     }
  
     public function newUploadMCQ($id){
